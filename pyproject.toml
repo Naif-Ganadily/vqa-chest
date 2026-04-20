@@ -1,0 +1,29 @@
+[project]
+name = "vqa-chest"
+version = "0.1.0"
+description = "Analyzing a public VQA medical dataset from huggingface and develop a VQA model with good metrics"
+readme = "README.md"
+authors = [
+    { name = "Naif Ganadily", email = "nganadil@asu.edu" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "accelerate>=1.13.0",
+    "datasets>=4.8.4",
+    "jupyterlab>=4.5.6",
+    "matplotlib>=3.10.8",
+    "pandas>=3.0.2",
+    "pillow>=12.2.0",
+    "pytest>=9.0.3",
+    "seaborn>=0.13.2",
+    "torch==2.*",
+    "torchvision>=0.26.0",
+    "transformers>=5.5.4",
+]
+
+[project.scripts]
+vqa-chest = "vqa_chest:main"
+
+[build-system]
+requires = ["uv_build>=0.11.7,<0.12.0"]
+build-backend = "uv_build"
