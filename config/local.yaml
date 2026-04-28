@@ -1,0 +1,9 @@
+# Configuration for streamlining the training
+
+
+dataset: "flavia-giammarino/vqa-rad"
+text_model_name: "distilbert-base-uncased"
+text_max_length: 32
+img_size: 224
+batch_size: 16
+num_workers: 4 
