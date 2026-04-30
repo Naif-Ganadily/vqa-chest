@@ -207,3 +207,13 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+wandb/
+*.pt
+*.pth
+data/01-raw/
+data/02-preprocessing/
+data/03-features/
+data/04-predictions/
+data/05-models/

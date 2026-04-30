@@ -11,5 +11,3 @@ def set_seed(seed: int = 42):
     torch.cuda.manual_seed_all(seed)
 
     os.environ["PYTHONHASHSEED"] = str(seed)
-
-    

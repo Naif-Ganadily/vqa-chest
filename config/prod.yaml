@@ -1,0 +1,14 @@
+wandb_project: "vqa-chest"
+run_name: "prod-run"
+dataset: "flaviagiammarino/vqa-rad"
+batch_size: 16
+lr: 1e-3
+epochs: 10
+seed: 42
+device: "cuda"
+img_size: 224
+max_text_len: 32
+text_emb_dim: 768
+text_model_id: "distilbert-base-uncased"
+checkpoint_dir: "data/05-models"
+predictions_dir: "data/04-predictions"
