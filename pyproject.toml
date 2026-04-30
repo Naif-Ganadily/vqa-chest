@@ -16,6 +16,7 @@ dependencies = [
     "pandas>=3.0.2",
     "pillow>=12.2.0",
     "pytest>=9.0.3",
+    "python-dotenv>=1.0.0",
     "scikit-learn>=1.8.0",
     "seaborn>=0.13.2",
     "torch==2.*",
@@ -25,8 +26,15 @@ dependencies = [
 ]
 
 [project.scripts]
-vqa-chest = "vqa_chest:main"
+train = "entrypoint.train:main"
 
 [build-system]
-requires = ["uv_build>=0.11.7,<0.12.0"]
-build-backend = "uv_build"
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta" 
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*", "entrypoint*"]
+
+[tool.uv.sources]
+vqa-chest = { workspace = true }
