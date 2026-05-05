@@ -6,12 +6,13 @@ import wandb
 
 from src.pipelines.feature_eng_pipeline import (
     build_text_encoder,
-    build_img_transform,
-    encode_question
+    build_img_transform
 )
+from src.pipelines.evaluate_pipeline import run as evaluate # We will call the evaluate pipeline at the end of training to evaluate on the test set
 from src.models.model import ImageTextBinaryModel
 from src.data import VQARADBinaryDataset
 from src.utils import set_seed
+from tqdm import tqdm
 
 def run(config: dict):
     # Set the Seed for reproducibility
@@ -56,7 +57,8 @@ def run(config: dict):
         model.train()
         running_loss = correct = total = 0
 
-        for images, text_embs, labels in train_loader:
+        loop = tqdm(train_loader, desc=f"Epoch {epoch:02d}/{config['epochs']}", leave=True)
+        for images, text_embs, labels in loop:
             images, text_embs, labels = (
                 images.to(device),
                 text_embs.to(device),
@@ -72,11 +74,28 @@ def run(config: dict):
             preds = (torch.sigmoid(logits) > 0.5).long()
             correct += (preds.cpu() == labels.cpu().long()).sum().item()
             total += labels.size(0)
+            loop.set_postfix(loss=f"{loss.item():.4f}")
 
         epoch_loss = running_loss / total
         epoch_acc  = correct / total
 
         wandb.log({"epoch": epoch, "train_loss": epoch_loss, "train_accuracy": epoch_acc})
         print(f"Epoch {epoch:02d}/{config['epochs']} loss={epoch_loss:.4f} acc={epoch_acc:.4f}")
+
+        # Added feature when the user wants to evaluate on the test set at the end of each epoch
+    metrics = evaluate(model, test_loader, config, device)
+
+        # Save the model as a W&B artifact
+    checkpoint_path = "model_checkpoint.pt"
+    torch.save(model.state_dict(), checkpoint_path)
+
+    artifact = wandb.Artifact(
+        name="vqa-chest-model",
+        type="model",
+        metadata=metrics
+    )
+
+    artifact.add_file(checkpoint_path)
+    wandb.log_artifact(artifact)
 
     wandb.finish()
