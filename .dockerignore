@@ -1,0 +1,27 @@
+# Keep the build context small and free of large / irrelevant files.
+.git
+.gitignore
+.venv
+
+# Python caches
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Data, checkpoints, and experiment-tracking outputs (never bake these in)
+data/
+mlruns/
+mlartifacts/
+mlflow.db
+wandb/
+*.pt
+*.pth
+
+# Notebooks and docs are not needed at runtime
+notebooks/
+*.ipynb
+README.md
+LICENSE
+.github/
