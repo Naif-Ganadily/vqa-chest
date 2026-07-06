@@ -1,4 +1,4 @@
-# 🩻 Medical VQA — Chest Baseline
+# 🩻 Medical VQA — Chest
 
 A multimodal Visual Question Answering system for chest X-rays. Given an image and a clinical question, the model predicts a binary yes/no answer.
 
