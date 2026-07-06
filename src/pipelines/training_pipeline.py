@@ -1,23 +1,25 @@
+import os
+
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from datasets import load_dataset
-import wandb
 
-from src.pipelines.feature_eng_pipeline import (
-    build_text_encoder,
-    build_img_transform
-)
-from src.pipelines.evaluate_pipeline import run as evaluate # We will call the evaluate pipeline at the end of training to evaluate on the test set
+from src.pipelines.feature_eng_pipeline import build_text_encoder, build_img_transform
+from src.pipelines.evaluate_pipeline import (
+    run as evaluate,
+)  # We will call the evaluate pipeline at the end of training to evaluate on the test set
 from src.models.model import ImageTextBinaryModel
 from src.data import VQARADBinaryDataset
 from src.utils import set_seed
+from src.tracking import build_tracker
 from tqdm import tqdm
+
 
 def run(config: dict):
     # Set the Seed for reproducibility
     set_seed(config["seed"])
-    
+
     # Device setup
     device = torch.device(config["device"] if torch.cuda.is_available() else "cpu")
 
@@ -31,10 +33,10 @@ def run(config: dict):
 
     def is_yes_no(example):
         return example["answer"].lower() in label_map
-    
+
     def add_label(example):
         return {"label": label_map[example["answer"].lower()]}
-    
+
     train_yn = ds["train"].filter(is_yes_no).map(add_label)
     test_yn = ds["test"].filter(is_yes_no).map(add_label)
 
@@ -49,8 +51,9 @@ def run(config: dict):
     criterion = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=config["lr"])
 
-    # WandB setup
-    wandb.init(project=config["wandb_project"], name=config["run_name"], config=config)
+    # Experiment tracker (W&B / MLflow / none -- chosen in config["tracker"])
+    tracker = build_tracker(config)
+    tracker.start_run(config)
 
     # Training loop
     for epoch in range(1, config["epochs"] + 1):
@@ -62,7 +65,7 @@ def run(config: dict):
             images, text_embs, labels = (
                 images.to(device),
                 text_embs.to(device),
-                labels.float().to(device)
+                labels.float().to(device),
             )
             optimizer.zero_grad()
             logits = model(images, text_embs)
@@ -77,25 +80,20 @@ def run(config: dict):
             loop.set_postfix(loss=f"{loss.item():.4f}")
 
         epoch_loss = running_loss / total
-        epoch_acc  = correct / total
+        epoch_acc = correct / total
 
-        wandb.log({"epoch": epoch, "train_loss": epoch_loss, "train_accuracy": epoch_acc})
+        tracker.log_metrics({"train_loss": epoch_loss, "train_accuracy": epoch_acc}, step=epoch)
         print(f"Epoch {epoch:02d}/{config['epochs']} loss={epoch_loss:.4f} acc={epoch_acc:.4f}")
 
-        # Added feature when the user wants to evaluate on the test set at the end of each epoch
-    metrics = evaluate(model, test_loader, config, device)
+    # Evaluate once on the test set after training completes.
+    metrics = evaluate(model, test_loader, config, device, tracker)
 
-        # Save the model as a W&B artifact
-    checkpoint_path = "model_checkpoint.pt"
+    # Persist the checkpoint under the configured models dir, then log it.
+    checkpoint_dir = config.get("checkpoint_dir", "data/05-models")
+    os.makedirs(checkpoint_dir, exist_ok=True)
+    run_name = config.get("run_name", "model")
+    checkpoint_path = os.path.join(checkpoint_dir, f"{run_name}.pt")
     torch.save(model.state_dict(), checkpoint_path)
 
-    artifact = wandb.Artifact(
-        name="vqa-chest-model",
-        type="model",
-        metadata=metrics
-    )
-
-    artifact.add_file(checkpoint_path)
-    wandb.log_artifact(artifact)
-
-    wandb.finish()
+    tracker.log_model(checkpoint_path, name="vqa-chest-model", metadata=metrics)
+    tracker.finish()

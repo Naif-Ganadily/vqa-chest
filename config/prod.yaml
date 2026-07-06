@@ -1,4 +1,8 @@
-wandb_project: "vqa-chest"
+# Experiment tracking -- private by default (self-hostable MLflow).
+tracker:
+  backend: "mlflow"      # wandb | mlflow | none
+  project: "vqa-chest"   # MLflow experiment name
+  tracking_uri: ""       # "" -> local SQLite; or on-prem DB/server (postgresql://... , http://mlflow.internal:5000)
 run_name: "prod-run"
 dataset: "flaviagiammarino/vqa-rad"
 batch_size: 16

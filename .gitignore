@@ -210,10 +210,14 @@ __marimo__/
 
 
 wandb/
+mlruns/
+mlartifacts/
+mlflow.db
 *.pt
 *.pth
-data/01-raw/
-data/02-preprocessing/
-data/03-features/
-data/04-predictions/
-data/05-models/
+data/01-raw/*
+data/02-preprocessing/*
+data/03-features/*
+data/04-predictions/*
+data/05-models/*
+!data/**/.gitkeep
