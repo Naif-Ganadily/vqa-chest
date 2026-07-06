@@ -13,7 +13,8 @@ dependencies = [
     "grad-cam>=1.5.5",
     "jupyterlab>=4.5.6",
     "matplotlib>=3.10.8",
-    "pandas>=3.0.2",
+    "mlflow>=2.16.0",
+    "pandas>=2.2.0,<3",  # pinned <3: MLflow currently requires pandas<3
     "pillow>=12.2.0",
     "pytest>=9.0.3",
     "python-dotenv>=1.0.0",
@@ -27,6 +28,7 @@ dependencies = [
 
 [project.scripts]
 train = "entrypoint.train:main"
+predict = "entrypoint.inference:main"
 
 [build-system]
 requires = ["setuptools>=61"]
@@ -38,3 +40,18 @@ include = ["src*", "entrypoint*"]
 
 [tool.uv.sources]
 vqa-chest = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "ruff>=0.6.0",
+]
+
+[tool.ruff]
+line-length = 100
+# Notebooks are exploratory scratch space; keep them out of lint/format gating.
+extend-exclude = ["notebooks"]
+
+[tool.pytest.ini_options]
+markers = [
+    "slow: tests that download models/data or need a GPU (deselect with -m 'not slow')",
+]
