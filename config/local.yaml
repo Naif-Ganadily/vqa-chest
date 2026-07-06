@@ -1,5 +1,9 @@
 # Configuration for streamlining the training
-wandb_project: "vqa-chest"
+# Experiment tracking -- switch backend here, no code changes needed.
+tracker:
+  backend: "mlflow"       # wandb | mlflow | none
+  project: "vqa-chest"   # W&B project / MLflow experiment name
+  tracking_uri: ""       # mlflow only; "" -> local private SQLite (mlflow.db)
 run_name: "local-run"
 dataset: "flaviagiammarino/vqa-rad"
 batch_size: 8

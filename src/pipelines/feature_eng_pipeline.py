@@ -29,13 +29,12 @@ def encode_question(question: str, tokenizer, text_model, config: dict) -> torch
 
 def build_img_transform(config: dict) -> transforms.Compose:
     """Image transform pipeline from config."""
-    return transforms.Compose([
-        transforms.Resize(512),
-        transforms.CenterCrop(512),
-        transforms.Resize((config["img_size"], config["img_size"])),
-        transforms.ToTensor(),
-        transforms.Normalize(
-            mean=[0.485, 0.456, 0.406],
-            std=[0.229, 0.224, 0.225]
-        ),
-    ])
+    return transforms.Compose(
+        [
+            transforms.Resize(512),
+            transforms.CenterCrop(512),
+            transforms.Resize((config["img_size"], config["img_size"])),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ]
+    )

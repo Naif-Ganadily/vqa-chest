@@ -3,6 +3,7 @@ import os
 import numpy as np
 import torch
 
+
 def set_seed(seed: int = 42):
     "Sets the seed for reproducibility accross multiple libraries"
     random.seed(seed)
